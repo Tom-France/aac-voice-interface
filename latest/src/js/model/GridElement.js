@@ -24,6 +24,7 @@ class GridElement extends Model({
     y: [Number],
     label: [Object, String, undefined], //map locale -> translation, e.g. "de" => LabelDE
     backgroundColor: [String],
+    colorCategory: [String],
     hidden: [Boolean],
     image: [GridImage],
     actions: [Object],
@@ -38,6 +39,7 @@ class GridElement extends Model({
             label: {},
             width: 1,
             height: 1,
+            image: new GridImage(),
             type: GridElement.ELEMENT_TYPE_NORMAL,
             additionalProps: {}
         };

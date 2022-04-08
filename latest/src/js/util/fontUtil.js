@@ -83,6 +83,30 @@ fontUtil.getTextWidth = function (text, containerElem, targetSize) {
     return metrics.width;
 }
 
+fontUtil.getHighContrastColor = function (hexBackground, lightColor, darkColor) {
+    if (!hexBackground) {
+        return '';
+    }
+    lightColor = lightColor || '#ffffff';
+    darkColor = darkColor || '#000000';
+    let rgb = hexToRgb(hexBackground);
+    let val = rgb.r * 0.299 + rgb.g * 0.587 + rgb.b * 0.114;
+    if (val > 149) {
+        return darkColor;
+    } else {
+        return lightColor;
+    }
+};
+
+function hexToRgb(hex) {
+    let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
 function getCssStyle(element, prop) {
     return window.getComputedStyle(element, null).getPropertyValue(prop);
 }

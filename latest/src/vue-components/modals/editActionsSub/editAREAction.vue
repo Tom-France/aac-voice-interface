@@ -1,12 +1,12 @@
 <template>
     <div>
         <test-are-connection v-model="action.areURL"/>
-        <div class="row">
+        <div class="srow">
             <div class="four columns">
                 <label class="normal-text">{{ $t('areModel') }}</label>
             </div>
             <div class="eight columns">
-                <div class="row nomargin">
+                <div class="srow nomargin">
                     <div class="twelve columns">
                         <span v-show="loading">{{ $t('loadingModelFromAre') }}</span>
                         <span v-show="!loading && areModelSync && areModelFile && !areModelFile.dataBase64">{{ $t('couldNotLoadModelFromAre') }}</span>
@@ -16,20 +16,20 @@
                         </span>
                     </div>
                 </div>
-                <div class="row">
+                <div class="srow">
                     <button class="six columns" @click="reloadAREModel(action)"><i class="fas fa-download"/> <span>{{ $t('downloadFromAre') }}</span></button>
                     <button v-if="areModelFile && areModelFile.dataBase64" class="six columns" @click="uploadAREModel(action)"><i class="fas fa-upload"/> <span>{{ $t('uploadToAre') }}</span></button>
                 </div>
             </div>
         </div>
-        <div class="row" v-if="!areModelSync">
+        <div class="srow" v-if="!areModelSync">
             <div class="eight columns offset-by-four">
                 <i class="fas fa-info-circle" />
                 <span v-show="areModelFile && areModelFile.dataBase64">{{ $t('uploadTheSavedModelOrDownloadCurrent') }}</span>
                 <span v-show="areModelFile && !areModelFile.dataBase64">{{ $t('downloadTheCurrentAreModelInOrderToDefine') }}</span>
             </div>
         </div>
-        <div class="row" v-if="areModelSync">
+        <div class="srow" v-if="areModelSync">
             <div class="four columns">
                 <label class="normal-text" for="inputComponentId">{{ $t('component') }}</label>
             </div>
@@ -39,7 +39,7 @@
                 </option>
             </select>
         </div>
-        <div class="row" v-if="areModelSync && areComponentPorts.length != 0">
+        <div class="srow" v-if="areModelSync && areComponentPorts.length != 0">
             <div class="four columns offset-by-four">
                 <label for="inputDataPortId" class="normal-text">{{ $t('sendDataToPort') }}</label>
                 <select id="inputDataPortId" class="full-width" v-model="action.dataPortId">
@@ -54,7 +54,7 @@
                 <input id="inputDataPortData" type="text" class="full-width" v-model="action.dataPortSendData"/>
             </div>
         </div>
-        <div class="row" v-if="areModelSync && areComponentEventPorts.length != 0">
+        <div class="srow" v-if="areModelSync && areComponentEventPorts.length != 0">
             <div class="eight columns offset-by-four">
                 <label for="inputeventPortId" class="normal-text">Event-Port</label>
                 <select id="inputeventPortId" class="full-width" v-model="action.eventPortId">
@@ -71,7 +71,6 @@
 <script>
     import FileSaver from 'file-saver'
     import {areService} from './../../../js/service/areService'
-    import {i18nService} from "../../../js/service/i18nService";
     import './../../../css/modal.css';
     import {GridData} from "../../../js/model/GridData";
     import {AdditionalGridFile} from "../../../js/model/AdditionalGridFile";
@@ -79,7 +78,7 @@
     import TestAreConnection from "./testAreConnection.vue";
 
     export default {
-        props: ['action', 'gridData', 'modelFile','setGridFileFn'],
+        props: ['action', 'gridData'],
         data: function () {
             return {
                 loading: false,
@@ -102,7 +101,7 @@
                         thiz.areModelFile.dataBase64 = base64Model;
                         thiz.areModelFile.fileName = modelName;
                         action.areModelGridFileName = modelName;
-                        thiz.setGridFileFn(thiz.action, thiz.areModelFile);
+                        thiz.updateGridModelFile();
                         thiz.loading = false;
                         thiz.areModelSync = true;
                         thiz.reloadComponentIds(action);
@@ -110,9 +109,22 @@
                     });
                 }).catch(() => {
                     thiz.areModelFile.dataBase64 = null;
-                    thiz.setGridFileFn(thiz.action, null);
+                    thiz.updateGridModelFile();
                     thiz.loading = false;
                 });
+            },
+            updateGridModelFile() {
+                let setFile = false;
+                this.gridData.additionalFiles = this.gridData.additionalFiles || [];
+                for (let i = 0; i < this.gridData.additionalFiles.length; i++) {
+                    if (this.action.areModelGridFileName && this.action.areModelGridFileName === this.gridData.additionalFiles[i].fileName) {
+                        this.gridData.additionalFiles[i] = this.areModelFile;
+                        setFile = true;
+                    }
+                }
+                if (!setFile) {
+                    this.gridData.additionalFiles.push(this.areModelFile);
+                }
             },
             uploadAREModel(action) {
                 var thiz = this;
@@ -145,13 +157,8 @@
         },
         mounted () {
             this.action.areURL = this.action.areURL || areService.getRestURL();
-            if(this.modelFile) { //model file parameter
-                this.areModelFile = this.modelFile;
-            } else {
-                this.areModelFile = new GridData(this.gridData).getAdditionalFile(this.action.areModelGridFileName);
-                this.setGridFileFn(this.action, this.areModelFile);
-            }
-            if(!this.areModelFile) {
+            this.areModelFile = new GridData(this.gridData).getAdditionalFile(this.action.areModelGridFileName);
+            if (!this.areModelFile) {
                 this.areModelFile = new AdditionalGridFile();
             }
             helpService.setHelpLocation('05_actions', '#asterics-action');
@@ -163,7 +170,7 @@
 </script>
 
 <style scoped>
-    .row {
+    .srow {
         margin-top: 1em;
     }
 

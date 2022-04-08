@@ -1,6 +1,6 @@
 <template>
     <div class="box" v-cloak>
-        <header class="row header" role="banner" v-if="metadata && !metadata.fullscreen">
+        <header class="srow header" role="banner" v-if="metadata && !metadata.fullscreen">
             <header-icon class="left" v-show="!metadata.locked"></header-icon>
             <div class="btn-group left">
                 <button tabindex="30" v-show="!metadata.locked" @click="toEditGrid()" class="spaced small"><i class="fas fa-pencil-alt"/> <span class="hide-mobile">{{ $t('editingOn') }}</span></button>
@@ -26,7 +26,7 @@
         <sequential-input-modal v-if="showModal === modalTypes.MODAL_SEQUENTIAL" @close="showModal = null; reinitInputMethods();"/>
         <unlock-modal v-if="showModal === modalTypes.MODAL_UNLOCK" @unlock="unlock(true)" @close="showModal = null;"/>
 
-        <div class="row content spaced" v-show="viewInitialized && gridData.gridElements && gridData.gridElements.length === 0 && (!globalGridData || globalGridData.length === 0)">
+        <div class="srow content spaced" v-show="viewInitialized && gridData.gridElements && gridData.gridElements.length === 0 && (!globalGridData || globalGridData.length === 0)">
             <div style="margin-top: 2em">
                 <i18n path="noElementsClickToEnterEdit" tag="span">
                     <template v-slot:link>
@@ -35,11 +35,11 @@
                 </i18n>
             </div>
         </div>
-        <div class="row content">
+        <div class="srow content">
             <div v-if="!viewInitialized" class="grid-container grid-mask">
                 <i class="fas fa-4x fa-spinner fa-spin"/>
             </div>
-            <div id="grid-container" class="grid-container">
+            <div id="grid-container" class="grid-container" :style="`background-color: ${backgroundColor}`">
             </div>
         </div>
     </div>
@@ -109,7 +109,8 @@
                 modalTypes: modalTypes,
                 viewInitialized: false,
                 unlockCount: UNLOCK_COUNT,
-                unlockCounter: UNLOCK_COUNT
+                unlockCounter: UNLOCK_COUNT,
+                backgroundColor: localStorageService.get(localStorageService.COLOR_DEFAULT_GRID_BACKGROUND) || 'white'
             }
         },
         components: {
@@ -195,6 +196,11 @@
 
                 if (inputConfig.huffEnabled) {
                     this.huffmanInput = HuffmanInput.getInstanceFromConfig(inputConfig, '.grid-item-content', 'scanFocus', 'scanInactive', selectionListener);
+                    this.huffmanInput.onDestroy(() => {
+                        if (gridInstance) {
+                            gridInstance.reinit(new GridData(JSON.parse(JSON.stringify(thiz.gridData))));
+                        }
+                    });
                     this.huffmanInput.start();
                 }
 
@@ -328,6 +334,20 @@
             $(document).on(constants.EVENT_SIDEBAR_OPEN, this.onSidebarOpen);
             document.addEventListener('contextmenu', this.contextMenuListener);
         },
+        beforeDestroy() {
+            $(document).off(constants.EVENT_DB_PULL_UPDATED, this.reloadFn);
+            $(document).off(constants.EVENT_LANGUAGE_CHANGE, this.reloadOnLangChange);
+            $(document).off(constants.EVENT_SIDEBAR_OPEN, this.onSidebarOpen);
+            document.removeEventListener('contextmenu', this.contextMenuListener);
+            stopInputMethods();
+            $.contextMenu('destroy');
+            vueApp = null;
+            if (gridInstance) {
+                gridInstance.destroy();
+                gridInstance = null;
+                printService.setGridInstance(null);
+            }
+        },
         mounted: function () {
             let thiz = this;
             vueApp = thiz;
@@ -393,20 +413,6 @@
                     log.warn(e);
                 }
             });
-        },
-        beforeDestroy() {
-            $(document).off(constants.EVENT_DB_PULL_UPDATED, this.reloadFn);
-            $(document).off(constants.EVENT_LANGUAGE_CHANGE, this.reloadOnLangChange);
-            $(document).off(constants.EVENT_SIDEBAR_OPEN, this.onSidebarOpen);
-            document.removeEventListener('contextmenu', this.contextMenuListener);
-            stopInputMethods();
-            $.contextMenu('destroy');
-            vueApp = null;
-            if (gridInstance) {
-                gridInstance.destroy();
-                gridInstance = null;
-                printService.setGridInstance(null);
-            }
         }
     };
 
