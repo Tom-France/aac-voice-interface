@@ -79,10 +79,10 @@ i18nService.getTranslation = function (i18nObject, fallbackLang, includeLang) {
     if (i18nObject[fallbackLang]) {
         return !includeLang ? i18nObject[fallbackLang] : {lang: fallbackLang, text: i18nObject[fallbackLang]};
     }
-    let keys = Object.keys(i18nObject);
+    /*let keys = Object.keys(i18nObject);
     if (i18nObject[keys[0]]) {
         return !includeLang ? i18nObject[keys[0]] : {lang: keys[0], text: i18nObject[keys[0]]};
-    }
+    }*/
     return !includeLang ? '' : {lang: undefined, text: ''};
 };
 
@@ -109,6 +109,7 @@ i18nService.setLanguage = function (lang, dontSave) {
         localStorageService.save(CUSTOM_LANGUAGE_KEY, lang);
     }
     let useLang = lang || i18nService.getBrowserLang();
+    $('html').prop('lang', useLang);
     return loadLanguage(useLang).then(() => {
         vueI18n.locale = useLang;
         $(document).trigger(constants.EVENT_LANGUAGE_CHANGE);
