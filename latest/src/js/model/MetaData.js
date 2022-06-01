@@ -2,6 +2,7 @@ import {modelUtil} from "../util/modelUtil";
 import {InputConfig} from "./InputConfig";
 import {constants} from "../util/constants";
 import {Model} from "../externals/objectmodel";
+import {ColorConfig} from "./ColorConfig.js";
 
 class MetaData extends Model({
     id: String,
@@ -14,12 +15,14 @@ class MetaData extends Model({
     locked: [Boolean],
     fullscreen: [Boolean],
     hashCodes: [Object], //object keys: model names of hashed objects, object values: another object with keys = hashcodes, values = object ids
-    inputConfig: InputConfig
+    inputConfig: InputConfig,
+    colorConfig: [ColorConfig]
 }) {
     constructor(properties, elementToCopy) {
         properties = modelUtil.setDefaults(properties, elementToCopy, MetaData) || {};
         super(properties);
-        this.id = this.id || modelUtil.generateId(MetaData.getIdPrefix())
+        this.id = this.id || modelUtil.generateId(MetaData.getIdPrefix());
+        this.colorConfig = properties.colorConfig || new ColorConfig();
     }
 
     isEqual(otherMetadata) {
@@ -30,6 +33,11 @@ class MetaData extends Model({
         delete comp1._id;
         delete comp2._id;
         return JSON.stringify(comp1) == JSON.stringify(comp2);
+    }
+
+    static getActiveColorScheme(metadata) {
+        metadata = metadata || new MetaData();
+        return constants.DEFAULT_COLOR_SCHEMES.filter(scheme => scheme.name === metadata.colorConfig.activeColorScheme)[0] || constants.DEFAULT_COLOR_SCHEMES[0];
     }
 
     static getModelName() {

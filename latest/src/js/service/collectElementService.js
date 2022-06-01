@@ -1,3 +1,4 @@
+import $ from '../externals/jquery.js'
 import {GridElement} from "../model/GridElement";
 import {speechService} from "./speechService";
 import {constants} from "./../util/constants";
@@ -14,7 +15,7 @@ import {imageUtil} from "../util/imageUtil.js";
 import {GridElementCollect} from "../model/GridElementCollect.js";
 import {GridActionSpeak} from "../model/GridActionSpeak.js";
 import {GridActionSpeakCustom} from "../model/GridActionSpeakCustom.js";
-import {localStorageService} from "./data/localStorageService.js";
+import {dataService} from "./data/dataService.js";
 
 let collectElementService = {};
 
@@ -176,7 +177,8 @@ function getActionTypes(elem) {
 
 async function updateCollectElements(isSecondTry) {
     autoCollectImage = collectedImages.some(e => !!e);
-    let txtBackgroundColor = localStorageService.get(localStorageService.COLOR_DEFAULT_GRID_BACKGROUND) || '#ffffff';
+    let metadata = await dataService.getMetadata();
+    let txtBackgroundColor = metadata.colorConfig.gridBackgroundColor || '#ffffff';
     for (let collectElement of registeredCollectElements) {
         let imageMode = isImageMode(collectElement.mode);
         let outerContainerJqueryElem = $(`#${collectElement.id} .collect-outer-container`);
