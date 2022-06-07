@@ -67,7 +67,7 @@
     import {MainVue} from "../../js/vue/mainVue";
 
     export default {
-        props: ['gridsData'],
+        props: ['gridsData', 'printGridId'],
         data: function () {
             return {
                 selectedGrid: null,
@@ -131,6 +131,12 @@
             dataService.getGlobalGrid().then(globalGrid => {
                 this.globalGridId = globalGrid ? globalGrid.id : null;
                 this.graphList = gridUtil.getGraphList(this.gridsData, this.globalGridId);
+                if (this.printGridId) {
+                    this.selectedGrid = this.gridsData.filter(grid => grid.id === this.printGridId)[0];
+                    this.options.exportConnected = false;
+                    this.options.showLinks = false;
+                    this.selectedGridChanged();
+                }
             });
         }
     }
