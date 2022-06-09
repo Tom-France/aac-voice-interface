@@ -1,4 +1,4 @@
-var constants = {};
+let constants = {};
 
 constants.ELEMENT_EVENT_ID = "ELEMENT_EVENT_ID";
 constants.MODEL_VERSION = '{"major": 4, "minor": 0, "patch": 0}';
@@ -94,5 +94,12 @@ constants.DEFAULT_COLOR_SCHEMES = [
             '#ffb56b']
     }
 ];
+
+constants.OPTION_TYPES = {
+    BOOLEAN: "BOOLEAN",
+    COLOR: "COLOR",
+    SELECT: "SELECT",
+    SELECT_COLORS: "SELECT_COLORS",
+}
 
 export {constants};

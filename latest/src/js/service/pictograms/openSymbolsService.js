@@ -6,12 +6,25 @@ let openSymbolsService = {};
 openSymbolsService.PROP_IMAGE_URL = 'image_url';
 openSymbolsService.PROP_AUTHOR = 'author';
 openSymbolsService.PROP_AUTHOR_URL = 'author_url';
+openSymbolsService.SEARCH_PROVIDER_NAME = 'OPENSYMBOLS';
 
 let _lastChunkSize = 10;
 let _lastChunkNr = 1;
 let _lastSearchTerm = null;
 let _lastRawResultList = null;
 let _hasNextChunk = false;
+
+let searchProviderInfo = {
+    name: openSymbolsService.SEARCH_PROVIDER_NAME,
+    url: "https://www.opensymbols.org/",
+    service: openSymbolsService
+};
+
+openSymbolsService.getSearchProviderInfo = function () {
+    let newInfo = JSON.parse(JSON.stringify(searchProviderInfo));
+    newInfo.service = openSymbolsService;
+    return newInfo;
+}
 
 /**
  * searches for images
@@ -78,16 +91,21 @@ function queryInternal(search, chunkNr, chunkSize) {
             _hasNextChunk = resultList.length > (endIndex + 1);
             for (let i = startIndex; i <= endIndex; i++) {
                 if (resultList[i]) {
-                    let element = JSON.parse(JSON.stringify(resultList[i]));
-                    let promise = imageUtil.urlToBase64(element[openSymbolsService.PROP_IMAGE_URL]);
+                    let element = {};
+                    let apiElement = JSON.parse(JSON.stringify(resultList[i]));
+                    element.url = apiElement[openSymbolsService.PROP_IMAGE_URL];
+                    element.author = apiElement[openSymbolsService.PROP_AUTHOR];
+                    element.authorURL = apiElement[openSymbolsService.PROP_AUTHOR_URL];
+                    element.searchProviderName = openSymbolsService.SEARCH_PROVIDER_NAME;
+                    /*let promise = imageUtil.urlToBase64(element.url);
                     element.promise = promise;
                     promise.then((base64) => {
                         if (base64) {
-                            element.base64 = base64;
+                            element.data = base64;
                         } else {
                             element.failed = true;
                         }
-                    });
+                    });*/
                     queriedElements.push(element);
                 }
             }
