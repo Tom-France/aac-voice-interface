@@ -4,6 +4,9 @@ if (!workbox) {
     console.log("Workbox in service worker failed to load!");
 }
 self.__WB_DISABLE_DEV_LOGS = true;
+/*workbox.setConfig({
+    debug: true
+});*/
 
 self.addEventListener('install', (event) => {
     console.log('installing service worker ...');
@@ -23,9 +26,28 @@ self.addEventListener('activate', event => {
     self.clients.matchAll().then(clients => {
         clients.forEach(client => client.postMessage({activated: true}));
     });
-    console.log('Service Worker active! Version: https://github.com/asterics/AsTeRICS-Grid/releases/tag/release-beta-2022-06-09-17.10/+0200');
+    console.log('Service Worker active! Version: https://github.com/asterics/AsTeRICS-Grid/releases/tag/release-beta-2022-06-13-10.50/+0200');
 });
 
 workbox.routing.registerRoute(({url, request, event}) => {
-    return url.href.indexOf('serviceWorker.js') === -1; //do not cache serviceWorker.js
+    //console.debug(`${url.href} should cache normal: ${shouldCacheNormal(url, request)}`);
+    return shouldCacheNormal(url, request);
 }, new workbox.strategies.CacheFirst());
+
+workbox.routing.registerRoute(({url, request, event}) => {
+    //console.debug(`${url.href} should cache image: ${shouldCacheImage(url, request)}`);
+    return shouldCacheImage(url, request);
+}, new workbox.strategies.CacheFirst({
+    cacheName: 'image-cache'
+}));
+
+function shouldCacheImage(url, request) {
+    let isOwnHost = url.hostname === 'localhost' || url.hostname === 'grid.asterics.eu';
+    let isImageRequest = request.destination === 'image';
+    return !isOwnHost && isImageRequest;
+}
+
+function shouldCacheNormal(url, request) {
+    let isOwnHost = url.hostname === 'localhost' || url.hostname === 'grid.asterics.eu';
+    return !shouldCacheImage(url, request) && isOwnHost;
+}
