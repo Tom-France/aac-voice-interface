@@ -92,7 +92,7 @@
     };
 
     let vueConfig = {
-        props: ['gridId'],
+        props: ['gridId', 'skipThumbnailCheck'],
         data() {
             return {
                 gridData: {},
@@ -402,15 +402,17 @@
                 thiz.viewInitialized = true;
                 $(document).trigger(constants.EVENT_GRID_LOADED);
                 let gridDataObject = new GridData(thiz.gridData);
-                if (gridDataObject.hasOutdatedThumbnail()) {
-                    imageUtil.getScreenshot("#grid-container").then(screenshot => {
-                        let thumbnail = {
-                            data: screenshot,
-                            hash: gridDataObject.getHash()
-                        };
-                        thiz.gridData.thumbnail = thumbnail;
-                        dataService.saveGrid(thiz.gridData);
-                    });
+                if (gridDataObject.hasOutdatedThumbnail() && !thiz.skipThumbnailCheck) {
+                    imageUtil.allImagesLoaded().then(() => {
+                        imageUtil.getScreenshot("#grid-container").then(screenshot => {
+                            let thumbnail = {
+                                data: screenshot,
+                                hash: gridDataObject.getHash()
+                            };
+                            thiz.gridData.thumbnail = thumbnail;
+                            dataService.saveGrid(thiz.gridData);
+                        });
+                    })
                 }
                 thiz.initInputMethods();
             }).catch((e) => {
@@ -520,35 +522,6 @@
                     break;
                 }
             }
-        }
-    }
-
-    window.updateAllThumbnails = async function (timeout) {
-        await util.sleep(timeout);
-        dataService.getGrids(false, true).then(async grids => {
-            for (const gridShort of grids) {
-                Router.toGrid(gridShort.id);
-                await new Promise(resolve => {
-                    $(document).on(constants.EVENT_GRID_LOADED, resolve);
-                })
-                await util.sleep(100);
-                await updateScreenshot(gridShort.id);
-            }
-        });
-        log.info('saved all thumbnails!');
-
-        async function updateScreenshot(gridId) {
-            let grid = await dataService.getGrid(gridId);
-            let screenshot = await imageUtil.getScreenshot("#grid-container");
-            log.info('save screenshot for: ' + i18nService.getTranslation(grid.label));
-            let thumbnail = {
-                data: screenshot,
-                hash: grid.getHash()
-            };
-            grid.thumbnail = thumbnail;
-            await dataService.updateGrid(grid.id, {
-                thumbnail: thumbnail
-            });
         }
     }
 

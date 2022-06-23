@@ -72,6 +72,9 @@
                     <li v-show="graphElemsToShow.length === 0"><span>{{ $t('noGrids') }}</span></li>
                 </ul>
             </div>
+            <div class="srow">
+                <button @click="updateAllThumbnails"><span class="fas fa-images"></span> {{ $t('updateAllGridThumbnails') }}</button>
+            </div>
 
             <div v-if="graphList.length > 0">
                 <h1>{{ $t('globalGrid') }}</h1>
@@ -114,10 +117,10 @@
     import {imageUtil} from "../../js/util/imageUtil";
     import GridLinkModal from "../modals/gridLinkModal.vue";
     import ExportPdfModal from "../modals/exportPdfModal.vue";
-    import {printService} from "../../js/service/printService";
     import {MainVue} from "../../js/vue/mainVue";
     import {MetaData} from "../../js/model/MetaData.js";
     import {localStorageService} from "../../js/service/data/localStorageService.js";
+    import {util} from "../../js/util/util.js";
 
     let ORDER_MODE_KEY = "AG_ALLGRIDS_ORDER_MODE_KEY";
     let SELECTOR_CONTEXTMENU = '#moreButton';
@@ -346,6 +349,70 @@
                 var $el = $(event.target); //reset file input
                 $el.wrap('<form>').closest('form').get(0).reset();
                 $el.unwrap();
+            },
+            async updateAllThumbnails() {
+                if (!confirm(i18nService.t('updateGridThumbnailsConfirm'))) {
+                    return;
+                }
+                let totalSize = 0;
+                let cancelled = false;
+                dataService.getGrids(false, true).then(async grids => {
+                    let index = 0;
+                    MainVue.showProgressBar(0, {
+                        header: i18nService.t("updateGridThumbnails"),
+                        text: i18nService.t("generatingThumbnails"),
+                        closable: true,
+                        cancelFn: () => {
+                            cancelled = true;
+                        }
+                    });
+                    for (const gridShort of grids) {
+                        if (cancelled) {
+                            Router.toManageGrids();
+                            return;
+                        }
+                        Router.toGrid(gridShort.id, {skipThumbnailCheck: true});
+                        await new Promise(resolve => {
+                            $(document).on(constants.EVENT_GRID_LOADED, resolve);
+                        });
+                        await util.sleep(100);
+                        await updateScreenshot(gridShort.id);
+                        if (cancelled) {
+                            Router.toManageGrids();
+                            return;
+                        }
+                        index++;
+                        MainVue.showProgressBar(Math.round(index / grids.length * 100), {
+                            header: i18nService.t("updateGridThumbnails"),
+                            text: i18nService.t("generatingThumbnails"),
+                            closable: true,
+                            cancelFn: () => {
+                                cancelled = true;
+                            }
+                        });
+                    }
+                    log.info(`saved all thumbnails with total size of ${totalSize / 1024}kB`);
+                    Router.toManageGrids();
+                    setTimeout(() => {
+                        MainVue.setTooltip(i18nService.t("updatedAllThumbnails"), {timeout: 20000, msgType: "success"});
+                    }, 500);
+                });
+
+                async function updateScreenshot(gridId) {
+                    let grid = await dataService.getGrid(gridId);
+                    await imageUtil.allImagesLoaded();
+                    let screenshot = await imageUtil.getScreenshot("#grid-container");
+                    log.info(`save screenshot for: ${i18nService.getTranslation(grid.label)}, size: ${screenshot.length / 1024}kB`);
+                    totalSize += screenshot.length;
+                    let thumbnail = {
+                        data: screenshot,
+                        hash: grid.getHash()
+                    };
+                    grid.thumbnail = thumbnail;
+                    await dataService.updateGrid(grid.id, {
+                        thumbnail: thumbnail
+                    });
+                }
             }
         },
         computed: {
