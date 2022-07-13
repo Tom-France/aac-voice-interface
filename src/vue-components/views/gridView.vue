@@ -26,6 +26,7 @@
         <scanning-modal v-if="showModal === modalTypes.MODAL_SCANNING" @close="showModal = null; reinitInputMethods();"/>
         <sequential-input-modal v-if="showModal === modalTypes.MODAL_SEQUENTIAL" @close="showModal = null; reinitInputMethods();"/>
         <unlock-modal v-if="showModal === modalTypes.MODAL_UNLOCK" @unlock="unlock(true)" @close="showModal = null;"/>
+        <recorder-modal v-if="showModal === modalTypes.MODAL_RECORDER" :card-name="selectedCardName" @close="finishRecord" />
 
         <div class="srow content spaced" v-show="viewInitialized && gridData.gridElements && gridData.gridElements.length === 0 && (!globalGridData || globalGridData.length === 0)">
             <div style="margin-top: 2em">
@@ -80,6 +81,7 @@
     import {localStorageService} from "../../js/service/data/localStorageService";
     import {imageUtil} from "../../js/util/imageUtil";
     import UnlockModal from "../modals/unlockModal.vue";
+    import RecorderModal from "../modals/recorderModal.vue";
     import {printService} from "../../js/service/printService";
 
     let vueApp = null;
@@ -92,7 +94,8 @@
         MODAL_HUFFMAN: 'MODAL_HUFFMAN',
         MODAL_SEQUENTIAL: 'MODAL_SEQUENTIAL',
         MODAL_UNLOCK: 'MODAL_UNLOCK',
-        MODAL_CUSTOM: 'MODAL_CUSTOM'
+        MODAL_CUSTOM: 'MODAL_CUSTOM',
+        MODAL_RECORDER: 'MODAL_RECORDER'
     };
 
     let vueConfig = {
@@ -125,7 +128,8 @@
             DirectionInputModal,
             CustomInputModal,
             MouseModal,
-            ScanningModal, HeaderIcon
+            ScanningModal, HeaderIcon,
+            RecorderModal
         },
         methods: {
             openModal(modalType) {
@@ -168,6 +172,28 @@
                     $(document).trigger(constants.EVENT_SIDEBAR_CLOSE);
                 });
             },
+            finishRecord() {
+              let thiz = this;
+              thiz.showModal = null;
+              thiz.recordResolvePromise();
+            },
+            record(selectedCardName, gridElementId) {
+              let thiz = this;
+
+              thiz.recordPromise = new Promise((resolve) => {
+                dataService.getGridElement(thiz.gridData.id, gridElementId).then(gridElement => {
+                  if (gridElement.label && JSON.stringify(gridElement.label) !== JSON.stringify({})) {
+                    thiz.selectedCardName = selectedCardName;
+                    thiz.showModal = modalTypes.MODAL_RECORDER;
+                    thiz.recordResolvePromise = resolve;
+                  } else {
+                    resolve()
+                  }
+                });
+              });
+
+              return thiz.recordPromise;
+            },
             initInputMethods() {
                 let thiz = this;
                 if (!gridInstance) {
@@ -178,8 +204,10 @@
                 window.addEventListener('resize', thiz.resizeListener, true);
                 $(document).on(constants.EVENT_GRID_RESIZE, thiz.resizeListener);
                 let selectionListener = (item) => {
+                  thiz.record(item.ariaLabel, item.id).then(() => {
                     L.removeAddClass(item, 'selected');
                     actionService.doAction(thiz.gridData.id, item.id);
+                  });
                 };
                 let activeListener = (item) => {
                     if (inputConfig.globalReadActive) {
