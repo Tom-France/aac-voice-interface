@@ -20,6 +20,7 @@ Aim of this project is to add faster interaction with the different icons and in
 }
 ```
 Key is the sorted keycodes combination and value is the custom id of a grid element. Action related to the grid element will be triggered when combination is pressed down.
+You can modify the map keys to change the combination to trigger the event. Currently, "77:79:84" -> t, o & m pressed simultaneously to go back to homepage, "8" -> backspace to clear the list of workds, "80" -> p pressed to play the words.
 * Work in progress: added voice capture to be sent to a data model training. Action related is to be able to switch between a training use of tha app and a voice translator use when data model have enough voice recording
 
 ## TODO
