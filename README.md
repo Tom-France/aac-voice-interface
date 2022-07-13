@@ -52,4 +52,4 @@ After `yarn install` the following commands are available:
 8. `npm run test` -> runs tests of the project using [Jest](https://jestjs.io/).
 
 ## Acknowledgements and Attribution
-* Thanks to Nessia, David, TOM France, Contentsquare, the team (Lionel, Stéphane, Guillaume, Benjamin, Medhi, and Ahmed) & all the people involved in the process.
+* Thanks to Nessia, David, TOM France, Contentsquare, the team (Lionel, Stéphane, Guillaume, Benjamin, Medhi, and Ahmed), Benjamin Klaus (main dev of Asterics GRID) & all the people involved in the process.
