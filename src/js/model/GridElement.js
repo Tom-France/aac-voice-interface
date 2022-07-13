@@ -16,6 +16,7 @@ import {GridActionOpenWebpage} from "./GridActionOpenWebpage.js";
 
 class GridElement extends Model({
     id: String,
+    customId: String,
     modelName: String,
     modelVersion: String,
     width: Number,
@@ -34,6 +35,7 @@ class GridElement extends Model({
     constructor(properties, elementToCopy) {
         let defaults = {
             id: "", //will be replaced by constructor
+            customId: "",
             modelName: GridElement.getModelName(),
             modelVersion: constants.MODEL_VERSION,
             label: {},

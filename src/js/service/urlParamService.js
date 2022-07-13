@@ -5,6 +5,7 @@ urlParamService.params = {
     PARAM_SCANNING: 'scanning',
     PARAM_HUFFMAN: 'huffman',
     PARAM_DIR_INPUT: 'direction',
+    PARAM_CUSTOM: 'custom',
     PARAM_RESET_DATABASE: 'reset',
     PARAM_DEFAULT_GRIDSET: 'default'
 }
@@ -28,6 +29,10 @@ urlParamService.isDirectionEnabled = function () {
 
 urlParamService.isHuffmanEnabled = function () {
     return hasParam(urlParamService.params.PARAM_HUFFMAN) && !isParamFalse(urlParamService.params.PARAM_HUFFMAN);
+};
+
+urlParamService.isCustomEnabled = function () {
+    return hasParam(urlParamService.params.PARAM_CUSTOM) && !isParamFalse(urlParamService.params.PARAM_CUSTOM);
 };
 
 urlParamService.shouldResetDatabase = function () {

@@ -25,6 +25,15 @@ templates.getGridBase = function (gridId) {
 
 
 templates.getGridItem = function (gridElem, locale, metadata) {
+    if (gridElem.x === 0 && gridElem.y === 0) {
+        gridElem.customId = "Home"
+    }
+    if (gridElem.x === 70 && gridElem.y === 0) {
+        gridElem.customId = "Clear"
+    }
+    if (gridElem.x === 60 && gridElem.y === 0) {
+        gridElem.customId = "Play"
+    }
     switch (gridElem.type) {
         case GridElement.ELEMENT_TYPE_COLLECT: {
             return getGridElementCollect(gridElem, metadata);
@@ -69,8 +78,8 @@ function getGridElementNormal(gridElem, fallbackLocale, metadata) {
     let ariaLabel = label ? label : getAriaLabel(gridElem);
 
     var template = `
-<li class="item" data-w="${gridElem.width}" data-h="${gridElem.height}" data-x="${gridElem.posX}" data-y="${gridElem.posY}" data-id="${gridElem.id}" data-label="${label}" data-img-id="${imgId}" data-type="${gridElem.type}">
-    <div class="grid-item-content" tabindex="40" aria-label="${ariaLabel}" id="${gridElem.id}" data-id="${gridElem.id}" data-empty="${!label && !imgData}" style="${`background-color: ${backgroundColor}; border: 1px solid ${getBorderColor(metadata)}`}">
+<li class="item" data-w="${gridElem.width}" data-h="${gridElem.height}" data-x="${gridElem.posX}" data-y="${gridElem.posY}" data-id="${gridElem.id}" data-custom-id="${gridElem.customId}" data-label="${label}" data-img-id="${imgId}" data-type="${gridElem.type}">
+    <div class="grid-item-content" tabindex="40" aria-label="${ariaLabel}" id="${gridElem.id}" data-id="${gridElem.id}" data-custom-id="${gridElem.customId}" data-empty="${!label && !imgData}" style="${`background-color: ${backgroundColor}; border: 1px solid ${getBorderColor(metadata)}`}">
         <div class="img-container" style="width: 100%; max-height: ${imgContainerMaxHeight};">
             <img src="${imgData}" style="max-width: 98%; max-height: 98%; object-fit: contain; margin: 1%;" crossorigin="anonymous"/>
         </div>
@@ -88,8 +97,8 @@ function getGridElementCollect(gridElem, metadata) {
     let fontColor = fontUtil.getHighContrastColor(txtBackgroundColor);
 
     var template = `
-<li class="item" data-w="${gridElem.width}" data-h="${gridElem.height}" data-x="${gridElem.posX}" data-y="${gridElem.posY}" data-id="${gridElem.id}" data-type="${gridElem.type}">
-    <div class="grid-item-content" tabindex="40" aria-label="${i18nService.t('ELEMENT_TYPE_COLLECT')}" id="${gridElem.id}" data-id="${gridElem.id}" style="${`background-color: ${backgroundColor}; border: 1px solid ${getBorderColor(metadata)}`}">
+<li class="item" data-w="${gridElem.width}" data-h="${gridElem.height}" data-x="${gridElem.posX}" data-y="${gridElem.posY}" data-id="${gridElem.id}" data-custom-id="${gridElem.customId}" data-type="${gridElem.type}">
+    <div class="grid-item-content" tabindex="40" aria-label="${i18nService.t('ELEMENT_TYPE_COLLECT')}" id="${gridElem.id}" data-id="${gridElem.id}" data-custom-id="${gridElem.customId}" style="${`background-color: ${backgroundColor}; border: 1px solid ${getBorderColor(metadata)}`}">
         <div class="collect-outer-container text-container" style="${`position: absolute; display:flex; inset: 5px; color: ${fontColor};`}">
         </div>
     </div>
@@ -103,8 +112,8 @@ function getGridElementPredict(gridElem, metadata) {
     let label = i18nService.getTranslation(gridElem.label);
 
     let template = `
-<li class="item" data-w="${gridElem.width}" data-h="${gridElem.height}" data-x="${gridElem.posX}" data-y="${gridElem.posY}" data-id="${gridElem.id}" data-label="${label}" data-type="${gridElem.type}">
-    <div class="grid-item-content" tabindex="40" id="${gridElem.id}" data-id="${gridElem.id}" style="${`background-color: rgb(255,228,178); border: 1px solid ${getBorderColor(metadata)}`}">
+<li class="item" data-w="${gridElem.width}" data-h="${gridElem.height}" data-x="${gridElem.posX}" data-y="${gridElem.posY}" data-id="${gridElem.id}" data-custom-id="${gridElem.customId}" data-label="${label}" data-type="${gridElem.type}">
+    <div class="grid-item-content" tabindex="40" id="${gridElem.id}" data-id="${gridElem.id}" data-custom-id="${gridElem.customId}" style="${`background-color: rgb(255,228,178); border: 1px solid ${getBorderColor(metadata)}`}">
         <div class="text-container" style="${txtContainerStyle}"><span style="display: table-cell; vertical-align: middle;">${label}</span></div>
     </div>
 </li>`;
@@ -117,8 +126,8 @@ function getGridElementYTPlayer(gridElem, metadata) {
     let label = i18nService.getTranslation(gridElem.label);
 
     var template = `
-<li class="item" data-w="${gridElem.width}" data-h="${gridElem.height}" data-x="${gridElem.posX}" data-y="${gridElem.posY}" data-id="${gridElem.id}" data-label="${label}" data-type="${gridElem.type}">
-    <div class="grid-item-content" tabindex="40" aria-label="${i18nService.t('ELEMENT_TYPE_YT_PLAYER')}" id="${gridElem.id}" data-id="${gridElem.id}" style="${`border: 1px solid ${getBorderColor(metadata)}`}">
+<li class="item" data-w="${gridElem.width}" data-h="${gridElem.height}" data-x="${gridElem.posX}" data-y="${gridElem.posY}" data-id="${gridElem.id}" data-custom-id="${gridElem.customId}" data-label="${label}" data-type="${gridElem.type}">
+    <div class="grid-item-content" tabindex="40" aria-label="${i18nService.t('ELEMENT_TYPE_YT_PLAYER')}" id="${gridElem.id}" data-id="${gridElem.id}" data-custom-id="${gridElem.customId}" style="${`border: 1px solid ${getBorderColor(metadata)}`}">
         ${stopClicking ? '<div id="youtubeClickPreventer" onclick="event.stopPropagation()" style="z-index: 100; position: absolute; top: 0; bottom: 0; left: 0; right: 0; height: 100%; width: 100%"></div>' : ''}
         <div class="yt-container" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;">
             <div id="player" style="outline: 1px solid; outline-offset: -5px; height: 100%; background-color: black; display: flex; align-items: center; justify-content: center;">
@@ -130,8 +139,28 @@ function getGridElementYTPlayer(gridElem, metadata) {
     return template;
 }
 
+function replacer(key, value) {
+    if(value instanceof Map) {
+        return {
+            dataType: 'Map',
+            value: Array.from(value.entries()),
+        };
+    } else {
+        return value;
+    }
+}
+
+function reviver(key, value) {
+    if(typeof value === 'object' && value !== null) {
+        if (value.dataType === 'Map') {
+            return new Map(value.value);
+        }
+    }
+    return value;
+}
+
 function fillDefaultValues(gridElem) {
-    gridElem = JSON.parse(JSON.stringify(gridElem));
+    gridElem = JSON.parse(JSON.stringify(gridElem, replacer), reviver);
     gridElem.width = gridElem.width || 1;
     gridElem.height = gridElem.height || 1;
     gridElem.posX = gridElem.x || 0;

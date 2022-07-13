@@ -40,9 +40,6 @@
     "webpack-cli": "^3.3.0",
     "webpack-dev-server": "^3.2.1"
   },
-  "resolutions": {
-    "@sensu/superlogin/**/leveldown": "5.4.1"
-  },
   "scripts": {
     "start": "webpack-dev-server --env.normalserver",
     "start-legacy": "webpack-dev-server --env.legacyserver",

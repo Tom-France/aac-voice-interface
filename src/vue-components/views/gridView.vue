@@ -19,6 +19,7 @@
 
         </header>
 
+        <custom-input-modal v-if="showModal === modalTypes.MODAL_CUSTOM" @close="showModal = null; reinitInputMethods();"/>
         <huffman-input-modal v-if="showModal === modalTypes.MODAL_HUFFMAN" @close="showModal = null; reinitInputMethods();"/>
         <direction-input-modal v-if="showModal === modalTypes.MODAL_DIRECTION" @close="showModal = null; reinitInputMethods();"/>
         <mouse-modal v-if="showModal === modalTypes.MODAL_MOUSE" @close="showModal = null; reinitInputMethods();"/>
@@ -62,6 +63,7 @@
     import {HuffmanInput} from "../../js/input/huffmanInput";
     import {DirectionInput} from "../../js/input/directionInput";
     import {SequentialInput} from "../../js/input/sequentialInput";
+    import {CustomInput} from "../../js/input/customInput";
 
     import HeaderIcon from '../../vue-components/components/headerIcon.vue'
     import {constants} from "../../js/util/constants";
@@ -73,6 +75,7 @@
     import DirectionInputModal from "../modals/input/directionInputModal.vue";
     import HuffmanInputModal from "../modals/input/huffmanInputModal.vue";
     import SequentialInputModal from "../modals/input/sequentialInputModal.vue";
+    import CustomInputModal from "../modals/input/customInputModal.vue";
     import {speechService} from "../../js/service/speechService";
     import {localStorageService} from "../../js/service/data/localStorageService";
     import {imageUtil} from "../../js/util/imageUtil";
@@ -88,7 +91,8 @@
         MODAL_DIRECTION: 'MODAL_DIRECTION',
         MODAL_HUFFMAN: 'MODAL_HUFFMAN',
         MODAL_SEQUENTIAL: 'MODAL_SEQUENTIAL',
-        MODAL_UNLOCK: 'MODAL_UNLOCK'
+        MODAL_UNLOCK: 'MODAL_UNLOCK',
+        MODAL_CUSTOM: 'MODAL_CUSTOM'
     };
 
     let vueConfig = {
@@ -105,6 +109,7 @@
                 directionInput: null,
                 seqInput: null,
                 huffmanInput: null,
+                customInput: null,
                 showModal: null,
                 modalTypes: modalTypes,
                 viewInitialized: false,
@@ -118,6 +123,7 @@
             SequentialInputModal,
             HuffmanInputModal,
             DirectionInputModal,
+            CustomInputModal,
             MouseModal,
             ScanningModal, HeaderIcon
         },
@@ -233,6 +239,12 @@
                     thiz.clicker = new Clicker('.grid-item-content');
                     thiz.clicker.setSelectionListener(selectionListener);
                     thiz.clicker.startClickcontrol();
+                }
+
+                if (inputConfig.customEnabled) {
+                    thiz.customInput = new CustomInput.getInstanceFromConfig('.grid-item-content')
+                    thiz.customInput.setSelectionListener(selectionListener);
+                    thiz.customInput.startCustom();
                 }
             },
             reinitInputMethods() {
@@ -388,6 +400,7 @@
                 metadata.inputConfig.scanEnabled = urlParamService.isScanningEnabled() ? true : metadata.inputConfig.scanEnabled;
                 metadata.inputConfig.dirEnabled = urlParamService.isDirectionEnabled() ? true : metadata.inputConfig.dirEnabled;
                 metadata.inputConfig.huffEnabled = urlParamService.isHuffmanEnabled() ? true : metadata.inputConfig.huffEnabled;
+                metadata.inputConfig.customEnabled = urlParamService.isHuffmanEnabled() ? true : metadata.inputConfig.customEnabled;
                 dataService.saveMetadata(metadata).then(() => {
                     if (metadata.locked) {
                         $(document).trigger(constants.EVENT_SIDEBAR_CLOSE);
@@ -432,6 +445,7 @@
         if (vueApp && vueApp.directionInput) vueApp.directionInput.destroy();
         if (vueApp && vueApp.huffmanInput) vueApp.huffmanInput.destroy();
         if (vueApp && vueApp.seqInput) vueApp.seqInput.destroy();
+        if (vueApp && vueApp.customInput) vueApp.customInput.destroy();
     }
 
     function initGrid(gridId) {
@@ -452,6 +466,7 @@
         let CONTEXT_DIRECTION = "CONTEXT_DIRECTION";
         let CONTEXT_HUFFMAN = "CONTEXT_HUFFMAN";
         let CONTEXT_SEQUENTIAL = "CONTEXT_SEQUENTIAL";
+        let CONTEXT_CUSTOM = "CONTEXT_CUSTOM";
 
         function getName(i18nKey, isActive) {
             let translated = i18nService.t(i18nKey);
@@ -486,6 +501,11 @@
                 name: getName('sequentialInput', inputConfig.seqEnabled),
                 icon: "fas fa-arrow-right",
                 className: inputConfig.seqEnabled ? 'boldFont' : ''
+            },
+            CONTEXT_CUSTOM: {
+                name: getName('customInput', inputConfig.customEnabled),
+                icon: "fas fa-arrow-right",
+                className: inputConfig.customEnabled ? 'boldFont' : ''
             }
         };
 
@@ -519,6 +539,10 @@
                 }
                 case CONTEXT_SEQUENTIAL: {
                     vueApp.openModal(modalTypes.MODAL_SEQUENTIAL);
+                    break;
+                }
+                case CONTEXT_CUSTOM: {
+                    vueApp.openModal(modalTypes.MODAL_CUSTOM);
                     break;
                 }
             }

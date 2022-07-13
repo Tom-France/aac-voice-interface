@@ -35,7 +35,9 @@ class InputConfig extends Model({
     huffShowNumbers: [Boolean],
     huffColorWholeElement: [Boolean],
     huffTimeout: [Number],
-    huffMarkInactive: [Boolean]
+    huffMarkInactive: [Boolean],
+    customEnabled: Boolean,
+    customMapping: Object
 }) {
     constructor(properties, elementToCopy) {
         properties = modelUtil.setDefaults(properties, elementToCopy, InputConfig);
@@ -96,6 +98,9 @@ InputConfig.DEFAULT_HUFF_INPUTS = [
 InputConfig.DEFAULT_HUFF_COLORS = ['#D55E00', '#F0E442', '#009E73', '#0072B2',
     '#CC79A7', '#E69F00', '#56B4E9', '#000000', '#016619'];
 
+
+InputConfig.DEFAULT_CUSTOM_MAPPING = new Map()
+
 InputConfig.defaults({
     id: "", //will be replaced by constructor
     modelName: InputConfig.getModelName(),
@@ -115,8 +120,10 @@ InputConfig.defaults({
     huffShowColors: true,
     huffShowNumbers: true,
     huffElementCount: 0,
-    huffTimeout: 4000,
-    huffMarkInactive: true
+    huffTimeout: 5000,
+    huffMarkInactive: true,
+    customEnabled: false,
+    customMapping: InputConfig.DEFAULT_CUSTOM_MAPPING
 });
 
 export {InputConfig};
